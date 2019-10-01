@@ -1,6 +1,57 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+// Create struct for shader program source
+struct ShaderProgramSource {
+	std::string VertexSource;
+	std::string FragmentSource;
+};
+
+// Parse the shader code
+static ShaderProgramSource ParseShader(const std::string& filepath){
+	// Open file
+	std::ifstream stream(filepath);
+
+	// Create shaders enum, set to 0 and 1 for the array
+	enum class ShaderType {
+		NONE = -1, VERTEX = 0, FRAGMENT = 1
+	};
+
+	// Create line string
+	std::string line;
+
+	// Create stringstream
+	std::stringstream ss[2];
+
+	// Initialise type to none
+	ShaderType type = ShaderType::NONE;
+
+	// Loop through file
+	while (getline(stream, line)) {
+		// If found #shader in line
+		if (line.find("#shader") != std::string::npos) {
+			if (line.find("vertex") != std::string::npos) {
+				// Set type to vertex
+				type = ShaderType::VERTEX;
+			}
+			else if (line.find("fragment") != std::string::npos) {
+				// Set mode to fragment
+				type = ShaderType::FRAGMENT;
+			}
+		}
+		else {
+			// Add lines to appropriate stringstream
+			ss[(int)type] << line << '\n';
+		}
+	}
+
+	// Return source code in struct
+	return { ss[0].str(), ss[1].str() };
+}
 
 // Compile a shader to be called in other program
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
@@ -127,28 +178,13 @@ int main(void)
 	// Fill our buffer with data
 	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
 
-	// Creating our shader
-	std::string vertexShader = 
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) in vec4 position;\n"
-		"\n"
-		"void main(){\n"
-		"	gl_Position = position;\n"
-		"}\n";
+	// Generate shader source code from file
+	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
-	std::string fragmentShader =
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) out vec4 color;\n"
-		"\n"
-		"void main(){\n"
-		"	color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-		"}\n";
-
-	unsigned int shader = CreateShader(vertexShader, fragmentShader);
+	// Create shader from source code
+	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
-
+	
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
