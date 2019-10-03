@@ -252,14 +252,13 @@ int main(void)
 		// Call draw on currently bound buffer
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
-		// Increment r
+		// Increment r to animate the red colour
 		if (r > 1.0f) {
 			increment = -0.05f;
 		}
 		else if (r < 0.0f) {
 			increment = 0.05f;
 		}
-
 		r += increment;
 
 		/* Swap front and back buffers */
