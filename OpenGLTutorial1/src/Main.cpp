@@ -1,29 +1,15 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-	x;\
-	ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#include "Renderer.h"
 
-// Clear all OpenGL errors
-static void GLClearError() {
-	while (glGetError() != GL_NO_ERROR);
-}
-
-// Print all errors
-static bool GLLogCall(const char* function, const char* file, int line) {
-	while (GLenum error = glGetError()) {
-		std::cerr << "OpenGL error: " << "0x" << std::hex << error << "\nFunction with error: " <<
-			function << " in " << file << ":" << line << std::endl;
-		return false;
-	}
-	return true;
-}
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 // Create struct for shader program source
 struct ShaderProgramSource {
@@ -147,6 +133,8 @@ int main(void)
 {
 	GLFWwindow* window;
 
+	
+
 	/* Initialize the library */
 	if (!glfwInit()){
 		std::cerr << "GLFW failed to initialise!" << std::endl;
@@ -160,6 +148,11 @@ int main(void)
 		glfwTerminate();
 		return -1;
 	}
+
+	// Set up minimum version
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
@@ -190,42 +183,23 @@ int main(void)
 		2, 3, 0  // Triangle 2
 	};
 
+	// CREATE VERTEX ARRAY OBJECT
+	unsigned int vao;								// VAO ID
+	GLCall(glGenVertexArrays(1, &vao));				// Create VAO
+	GLCall(glBindVertexArray(vao));					// Bind VAO
+
 	// CREATING A BUFFER FOR THE VERTICES
-	// Our buffer ID
-	unsigned int buffer;
+	VertexBuffer vb(positions, 4 * 2 * sizeof(float));
 
-	// Generate 1 buffer with our buffer ID
-	GLCall(glGenBuffers(1, &buffer));
-
-	// Bind our buffer
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-
-	// Create vertex position attribute with index 0 (only attribute), 2 floats, without normalising, with size between verteces being 2*floatsize, since there are no other attributes, and the attribute starts at 0
+	// Set up vertex attributes
 	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
-
-	// Enable vertex position attribute
-	GLCall(glEnableVertexAttribArray(0));
-
-	// Fill our buffer with data
-	GLCall(glBufferData(GL_ARRAY_BUFFER, 2 * 6 * sizeof(float), positions, GL_STATIC_DRAW));
-
+	GLCall(glEnableVertexAttribArray(0));			// Enable vertex position attribute
 
 	// CREATING A BUFFER FOR THE INDICES
-	// Our index buffer ID
-	unsigned int ibo;
-
-	// Generate 1 index buffer with our buffer ID
-	GLCall(glGenBuffers(1, &ibo));
-
-	// Bind our buffer
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-
-	// Fill buffer with data
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+	IndexBuffer ib(indices, 6);
 
 	// Generate shader source code from file
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-
 	// Create shader from source code
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	GLCall(glUseProgram(shader));
@@ -245,13 +219,10 @@ int main(void)
 	{
 		/* Render here */
 		GLCall(glClear(GL_COLOR_BUFFER_BIT));
-
 		// Set Colour
 		GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
-
 		// Call draw on currently bound buffer
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-
 		// Increment r to animate the red colour
 		if (r > 1.0f) {
 			increment = -0.05f;
@@ -260,17 +231,14 @@ int main(void)
 			increment = 0.05f;
 		}
 		r += increment;
-
 		/* Swap front and back buffers */
 		GLCall(glfwSwapBuffers(window));
-
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
 
-	// Delete program
+	// Cleanup
 	GLCall(glDeleteProgram(shader));
-
 	glfwTerminate();
 	return 0;
 }
