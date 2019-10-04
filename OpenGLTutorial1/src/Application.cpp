@@ -8,6 +8,8 @@
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
+#include "VertexArray.h"
+#include "IndexBuffer.h"
 
 // Create struct for shader program source
 struct ShaderProgramSource {
@@ -153,94 +155,93 @@ int main(void)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
-	// Fix framerate
-	glfwSwapInterval(1);
-
-	// Initialise GLEW
-	if (glewInit() != GLEW_OK) {
-		std::cerr << "GLEW failed to initialise!" << std::endl;
-		return -1;
-	}
-
-	// Print openGL version
-	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
-
-	// Triangle vertices
-	float positions[] = {
-		-0.5f, -0.5f, //0
-		 0.5f, -0.5f, //1
-		 0.5f,  0.5f, //2
-		-0.5f,  0.5f, //3
-	};
-
-	// Index buffer
-	unsigned int indices[] = {
-		0, 1, 2, // Triangle 1
-		2, 3, 0  // Triangle 2
-	};
-
-	// CREATE VERTEX ARRAY OBJECT
-	unsigned int vao;								// VAO ID
-	GLCall(glGenVertexArrays(1, &vao));				// Create VAO
-	GLCall(glBindVertexArray(vao));					// Bind VAO
-
-	// CREATING A BUFFER FOR THE VERTICES
-	unsigned int buffer;							// Our buffer ID
-	GLCall(glGenBuffers(1, &buffer));				// Generate 1 buffer with our buffer ID
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));	// Bind our buffer
-	// Create vertex position attribute with index 0 (only attribute), 2 floats, without normalising, with size between verteces being 2*floatsize, since there are no other attributes, and the attribute starts at 0
-	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
-	GLCall(glEnableVertexAttribArray(0));			// Enable vertex position attribute
-	GLCall(glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(float), positions, GL_STATIC_DRAW));	// Fill our buffer with data
-
-
-	// CREATING A BUFFER FOR THE INDICES
-	unsigned int ibo;					// Our index buffer ID
-	GLCall(glGenBuffers(1, &ibo));		// Generate 1 index buffer with our buffer ID
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));	// Bind our buffer
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));	// Fill buffer with data
-	
-	// Generate shader source code from file
-	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-	// Create shader from source code
-	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-	GLCall(glUseProgram(shader));
-
-	// Creat colour uniform at location, assert that the location is found
-	GLCall(int location = glGetUniformLocation(shader, "u_Color"));
-	ASSERT(location != -1);
-	GLCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
-	
-	// Red colour channel
-	float r = 0.0f;
-	float increment = 0.05f;
-
-	// MAIN LOOP
-	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window))
 	{
-		/* Render here */
-		GLCall(glClear(GL_COLOR_BUFFER_BIT));
-		// Set Colour
-		GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
-		// Call draw on currently bound buffer
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-		// Increment r to animate the red colour
-		if (r > 1.0f) {
-			increment = -0.05f;
+
+		// Fix framerate
+		glfwSwapInterval(1);
+
+		// Initialise GLEW
+		if (glewInit() != GLEW_OK) {
+			std::cerr << "GLEW failed to initialise!" << std::endl;
+			return -1;
 		}
-		else if (r < 0.0f) {
-			increment = 0.05f;
+
+		// Print openGL version
+		std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+
+		// Triangle vertices
+		float positions[] = {
+			-0.5f, -0.5f, //0
+			 0.5f, -0.5f, //1
+			 0.5f,  0.5f, //2
+			-0.5f,  0.5f, //3
+		};
+
+		// Index buffer
+		unsigned int indices[] = {
+			0, 1, 2, // Triangle 1
+			2, 3, 0  // Triangle 2
+		};
+
+		// CREATE VERTEX ARRAY OBJECT
+		unsigned int vao;								// VAO ID
+		GLCall(glGenVertexArrays(1, &vao));				// Create VAO
+		GLCall(glBindVertexArray(vao));					// Bind VAO
+
+		VertexArray va;
+		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+		va.AddBuffer(vb, layout);
+
+		IndexBuffer ib(indices, 6);
+
+		va.Bind();
+
+		// Generate shader source code from file
+		ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
+		// Create shader from source code
+		unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+		GLCall(glUseProgram(shader));
+
+		// Creat colour uniform at location, assert that the location is found
+		GLCall(int location = glGetUniformLocation(shader, "u_Color"));
+		ASSERT(location != -1);
+		GLCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
+
+		// Red colour channel
+		float r = 0.0f;
+		float increment = 0.05f;
+
+		// MAIN LOOP
+		/* Loop until the user closes the window */
+		while (!glfwWindowShouldClose(window))
+		{
+			/* Render here */
+			GLCall(glClear(GL_COLOR_BUFFER_BIT));
+			// Set Colour
+			GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+			// Call draw on currently bound buffer
+			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+			// Increment r to animate the red colour
+			if (r > 1.0f) {
+				increment = -0.05f;
+			}
+			else if (r < 0.0f) {
+				increment = 0.05f;
+			}
+			r += increment;
+			/* Swap front and back buffers */
+			GLCall(glfwSwapBuffers(window));
+			/* Poll for and process events */
+			glfwPollEvents();
 		}
-		r += increment;
-		/* Swap front and back buffers */
-		GLCall(glfwSwapBuffers(window));
-		/* Poll for and process events */
-		glfwPollEvents();
+
+		GLCall(glDeleteProgram(shader));
+
 	}
 
 	// Cleanup
-	GLCall(glDeleteProgram(shader));
 	glfwTerminate();
 	return 0;
 }
