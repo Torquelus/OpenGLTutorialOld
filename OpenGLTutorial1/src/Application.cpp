@@ -8,9 +8,11 @@
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -82,6 +84,14 @@ int main(void)
 		shader.Bind();
 		shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
 
+		// Create texture
+		Texture texture("res/textures/n64.png");
+		texture.Bind();
+		shader.SetUniform1i("u_Texture", 0);
+
+		// Create renderer
+		Renderer renderer;
+
 		// Red colour channel
 		float r = 0.0f;
 		float increment = 0.05f;
@@ -90,12 +100,15 @@ int main(void)
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
-			/* Render here */
-			GLCall(glClear(GL_COLOR_BUFFER_BIT));
+			// Clear renderer
+			renderer.Clear();
+
 			// Set Colour
 			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-			// Call draw on currently bound buffer
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+			
+			// Call draw
+			renderer.Draw(va, ib, shader);
+			
 			// Increment r to animate the red colour
 			if (r > 1.0f) {
 				increment = -0.05f;
@@ -104,8 +117,9 @@ int main(void)
 				increment = 0.05f;
 			}
 			r += increment;
+
 			/* Swap front and back buffers */
-			GLCall(glfwSwapBuffers(window));
+			glfwSwapBuffers(window);
 			/* Poll for and process events */
 			glfwPollEvents();
 		}
