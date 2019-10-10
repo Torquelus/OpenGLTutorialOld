@@ -1,4 +1,14 @@
 ﻿  Application.cpp
   TestTexture2D.cpp
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:  'argument': conversion from '_Ty' to 'unsigned int', possible loss of data
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:         with
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:         [
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:             _Ty=unsigned __int64
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:         ]
   Generating Code...
+C:\Users\atork\source\repos\OpenGLTutorial1\OpenGLTutorial1\src\tests\TestTexture2D.cpp(41): message :  see reference to function template instantiation 'std::unique_ptr<VertexBuffer,std::default_delete<_Ty>> std::make_unique<VertexBuffer,float(&)[16],unsigned __int64,0>(float (&)[16],unsigned __int64 &&)' being compiled
+C:\Users\atork\source\repos\OpenGLTutorial1\OpenGLTutorial1\src\tests\TestTexture2D.cpp(41): message :         with
+C:\Users\atork\source\repos\OpenGLTutorial1\OpenGLTutorial1\src\tests\TestTexture2D.cpp(41): message :         [
+C:\Users\atork\source\repos\OpenGLTutorial1\OpenGLTutorial1\src\tests\TestTexture2D.cpp(41): message :             _Ty=VertexBuffer
+C:\Users\atork\source\repos\OpenGLTutorial1\OpenGLTutorial1\src\tests\TestTexture2D.cpp(41): message :         ]
   OpenGLTutorial1.vcxproj -> C:\Users\atork\source\repos\OpenGLTutorial1\x64\Debug\OpenGLTutorial1.exe

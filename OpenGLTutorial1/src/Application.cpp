@@ -84,6 +84,7 @@ int main(void)
 		currentTest = testMenu;
 
 		testMenu->RegisterTest<test::TestClearColour>("Clear Colour");
+		testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
 
 		// MAIN LOOP
 		/* Loop until the user closes the window */
