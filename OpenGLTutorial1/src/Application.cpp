@@ -22,7 +22,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "tests/TestClearColour.h"
-#include "tests/TestTexture.h"
+#include "tests/TestTexture2D.h"
 #include "tests/TestMenu.h"
 
 int main(void)

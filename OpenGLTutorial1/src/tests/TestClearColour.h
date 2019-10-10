@@ -11,7 +11,6 @@ namespace test {
 		TestClearColour();							// Constructor
 		~TestClearColour();							// Destructor
 
-		void OnUpdate(float deltaTime) override;	// Each frame (or deltaTime)
 		void OnRender() override;					// Render objects
 		void OnImGuiRender() override;				// Render GUI
 	};

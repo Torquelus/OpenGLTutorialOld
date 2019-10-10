@@ -15,10 +15,6 @@ namespace test {
 		
 	}
 
-	void TestClearColour::OnUpdate(float deltaTime){
-
-	}
-
 	// Render Objects
 	void TestClearColour::OnRender(){
 		// Set clear colour and clear screen
